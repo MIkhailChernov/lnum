@@ -38,38 +38,22 @@ typedef vector<ll> vll;
 typedef unsigned long long ull;
 typedef tree <pair<int, char>, null_type, less<pair<int, char>>, rb_tree_tag, tree_order_statistics_node_update> _tree;
  
-map <pair<ii, int>, pair<int, bool>>  table;
-const int maxn = 300;
-int n;
-int h1[maxn], h2[maxn], w1[maxn], w2[maxn];
- 
-int f (int pos, int _fi, int _se) {
-    if (pos == n) re max (_fi, _se);
-    if (table.count(mp(mp(pos, _fi), _se))) re table[mp(mp(pos, _fi), _se)].fi;
-    int time1 = _fi + h1[pos], time2 = _se + h2[pos];
-    int ans1 = f(pos + 1, w1[pos], max (0, _se - time1)) + time1, ans2 = time2 + f(pos + 1, max (0, _fi - time2), w2[pos]);
-   	if (ans1 < ans2) table[mp(mp(pos, _fi), _se)] = mp(ans1, true);
-   	else table[mp(mp(pos, _fi), _se)] = mp(ans2, false);
-   	re table[mp(mp(pos, _fi), _se)].fi; 
+void Z_function (string &str, vi &z) {
+	int n = str.size();
+	z.resize(n, 0);
+	for (int i = 1, l = 0, r = 0; i < n; ++i) {
+		if (i <= r) {
+			z[i] = min(r - i + 1, z[i - l]); 
+		}
+		while (i + z[i] < n && str[z[i]] == str[i + z[i]]) ++z[i];
+		if (i + z[i] - 1 > r) l = i, r = z[i] + i - 1;
+	}
 }
- 
+
 int main() {
-    scanf("%d", &n);
-    fo(i, n) scanf("%d%d%d%d", h1 + i, w1 + i, h2 + i, w2 + i);
-    cout << f(0, 0, 0) << endl;
-    int pos = 0, _fi = 0, _se = 0;
-    while (table.count (mp(mp(pos, _fi), _se))) {
-    	int n1 = pos + 1, n2, n3;
-    	if (table[mp(mp(pos, _fi), _se)].se) {
-    		cout << 1 << ' ';
-    		n2 = w1[pos];
-    		n3 = max (0, _se - (_fi + h1[pos])); 
-    	} else {
-    		cout << 2 << ' ';
-    		n2 = max (0, _fi - (_se + h2[pos]));
-    		n3 = w2[pos];
-    	}
-    	pos = n1, _fi = n2, _se = n3;
-    }
-    return 0;
+	string str;
+	vi v;
+	cin >> str;
+	Z_function(str, v);
+	for (int j : v) cout << j << ' ';
 }
