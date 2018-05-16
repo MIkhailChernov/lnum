@@ -37,23 +37,22 @@ typedef pair<ll, ll> pll;
 typedef vector<ll> vll;
 typedef unsigned long long ull;
 typedef tree <pair<int, char>, null_type, less<pair<int, char>>, rb_tree_tag, tree_order_statistics_node_update> _tree;
- 
-void Z_function (string &str, vi &z) {
-	int n = str.size();
-	z.resize(n, 0);
-	for (int i = 1, l = 0, r = 0; i < n; ++i) {
-		if (i <= r) {
-			z[i] = min(r - i + 1, z[i - l]); 
-		}
-		while (i + z[i] < n && str[z[i]] == str[i + z[i]]) ++z[i];
-		if (i + z[i] - 1 > r) l = i, r = z[i] + i - 1;
+
+void prefix_function (string &s, vi &p) {
+	int n = s.size();
+	p.resize(n);
+	for (int i = 1; i < n; ++i) {
+		int j = p[i - 1];
+		while (j > 0 && s[i] != s[j]) j = p[j - 1];
+		if (s[i] == s[j]) ++j;
+		p[i] = j;
 	}
 }
 
 int main() {
-	string str;
-	vi v;
-	cin >> str;
-	Z_function(str, v);
-	for (int j : v) cout << j << ' ';
+	string s;
+	cin >> s;
+	vi p;
+	prefix_function(s, p);
+	for (int j : p) cout << j << ' ';
 }
