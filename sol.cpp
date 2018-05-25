@@ -38,95 +38,56 @@ typedef vector<ll> vll;
 typedef unsigned long long ull;
 typedef tree <pair<int, char>, null_type, less<pair<int, char>>, rb_tree_tag, tree_order_statistics_node_update> _tree;
  
-class lnum{
-private:
-    vi v;
-    int mod = (int) 1e9;
+const int max_size = (int) 1e6;
+#define left (0)
+#define right ((int)1e9)
+
+class node {
 public:
-    int size() const{
-        re v.size();
-    }
-    lnum(char *s) {
-        for(int i = strlen(s); i > 0; i -= 9) {
-            s[i] = 0;
-            v.pb(atoi(i >= 9 ? s + i - 9 : s));
-        }
-        while(v.size() > 1 && v.back() == 0) v.pop_back();
-    }
-    lnum(int x) {
-        v.pb(x);
-    }
-    lnum& operator += (const lnum& a) {
-        int carry = false;
-        for(int i = 0; i < max(this->size(), a.size()) || carry; ++i) {
-            if (this->size() == i) v.pb(0);
-            v[i] += carry + (i < a.size() ? a.v[i] : 0);
-            carry = v[i] >= mod;
-            if (carry) v[i] -= mod;
-        }
-    }
-    lnum& operator -= (const lnum& a) {
-        bool carry = false;
-        for(int i = 0; i < a.size() || carry; ++i) {
-            v[i] -= carry + (i < a.size() ? a.v[i] : 0);
-            carry = v[i] < 0;
-            if (carry) v[i] += mod;
-        }
-        while(v.size() > 1 && v.back() == 0) v.pop_back();
-    }
-    bool operator < (const lnum& a) const{
-        if (this->size() < a.size()) re true;
-        if (this->size() > a.size()) re false;
-        ro(i, a.size()) {
-            if (a.v[i] == v[i]) continue;
-            re v[i] < a.v[i];
-        }
-        re false;
-    }
-    lnum& mul(const lnum& a, const lnum& b) {
-        v.clear();
-        v.resize(a.size() + b.size());
-        fo(i, a.size()) {
-            for(int j = 0, carry = 0; j < b.size() || carry; ++j) {
-                ll cur = v[i + j] + a.v[i] * 1ll * (j < b.size() ? b.v[j] : 0) + carry;
-                v[i + j] = (int) (cur % mod);
-                carry = (int) (cur / mod);
-            }
-        }
-        while(v.size() > 1 && v.back() == 0) v.pop_back();
-    }
-    lnum& operator *= (int a){
-        int carry = 0;
-        for(int i = 0; i < v.size() || carry; ++i) {
-            if (v.size() == i) v.pb(0);
-            ll cur = v[i] * 1ll * a + carry;
-            v[i] = (int) (cur % mod);
-            carry = (int) (cur / mod);
-        }
-        while(v.size() > 1 && v.back() == 0) v.pop_back();
-    }
-    lnum& pow(lnum& a, int n) {
-        char s[10]; s[0] = '1'; s[1] = 0;
-        *this = lnum(s);
-        while(n) {
-            if (n & 1) {
-                lnum x = *this;
-                this->mul(x, a);
-            }
-            lnum x = a;
-            a.mul(x, x);
-            n >>= 1;
-        }
-    }
-    void print() {
-        printf("%d", v.empty() ? 0 : v.back());
-        for(int i = (int)v.size() - 2; i >= 0; --i) printf("%09d", v[i]);
-    }
+	node *l, *r;
+	int value;
+	node() {
+		l = r = nullptr;
+		value = 0;
+	}
 };
 
+#define tree node *
+node root[max_size];
+int _now = 1;
+
+void add (tree t, int l, int r, int pos, int val) {
+	t->value += val;
+	if (r - l == 1) return;
+	int c = (l + r) >> 1;
+	if (pos < c) {
+		if (!t->l) t->l = &root[_now++];
+		add (t->l, l, c, pos, val);		
+	} else {
+		if (!t->r) t->r = &root[_now++];
+		add (t->r, c, r, pos, val);
+	}                              
+}
+
+int get (tree t, int l, int r, int L, int R) {
+	if (r == R && l == L) re t->value;
+	int ans = 0;
+	int c = (l + r) >> 1;
+	if (L < c && t->l) ans += get (t->l, l, c, L, min(c, R));
+	if (R > c && t->r) ans += get (t->r, c, r, max(c, L), R);
+	return ans;
+}
+
 int main() {
-	lnum x(5), y(5), z(1);
-	z.mul(x, y);
-	z.print();
-	re 0;
+	int n, m, x, l, r;
+	scanf("%d%d", &n, &m);
+	fo(i, n) {
+		scanf("%d", &x);
+		add(root, left, right, i, x);
+	}
+	fo(i, m) {
+		scanf("%d%d", &l, &r);
+		printf("%d\n", get(root, left, right, l - 1, r));
+	}
+	return 0;
 }
