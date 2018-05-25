@@ -41,13 +41,12 @@ typedef tree <pair<int, char>, null_type, less<pair<int, char>>, rb_tree_tag, tr
 const int maxn = (int) 1e5;
 vi pn, cn;
 
-void massive_suffix (vector<vi> &p, string &str) {
-	vector <vi> c;
+void massive_suffix (vector<vi> &p, vector <vi> &c, string &str) {
 	int n = str.size();
 	int m = (int)log2(n) + 2;
 	p.resize(m), c.resize(m);
 	for (int i = 0; i < m; ++i) p[i].resize(n), c[i].resize(n);
-	vi cnt(256), pn(n), cn(n);
+	vi cnt(max(256, n)), pn(n), cn(n);
 	for (int i = 0; i < n; ++i) cnt[str[i]]++;		
 	for (int i = 1; i < cnt.size(); ++i) cnt[i] += cnt[i - 1];
 	for (int i = 0; i < n; ++i) p[0][--cnt[str[i]]] = i;
@@ -80,8 +79,8 @@ void massive_suffix (vector<vi> &p, string &str) {
 int main() {
 	string str;
 	cin >> str;
-	vector <vi> p;
-	massive_suffix(p, str);
+	vector <vi> p, c;
+	massive_suffix(p, c, str);
 	int m = p.size();
 	fo(i, m) {
 		cout << (1 << i) << endl;
