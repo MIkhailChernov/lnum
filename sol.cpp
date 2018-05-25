@@ -38,54 +38,95 @@ typedef vector<ll> vll;
 typedef unsigned long long ull;
 typedef tree <pair<int, char>, null_type, less<pair<int, char>>, rb_tree_tag, tree_order_statistics_node_update> _tree;
  
-const int maxn = (int) 1e5;
-vi pn, cn;
-
-void massive_suffix (vector<vi> &p, vector <vi> &c, string &str) {
-	int n = str.size();
-	int m = (int)log2(n) + 2;
-	p.resize(m), c.resize(m);
-	for (int i = 0; i < m; ++i) p[i].resize(n), c[i].resize(n);
-	vi cnt(max(256, n)), pn(n), cn(n);
-	for (int i = 0; i < n; ++i) cnt[str[i]]++;		
-	for (int i = 1; i < cnt.size(); ++i) cnt[i] += cnt[i - 1];
-	for (int i = 0; i < n; ++i) p[0][--cnt[str[i]]] = i;
-	int classes = 1;
-	for (int i = 1; i < n; ++i) {
-		if (str[p[0][i]] != str[p[0][i - 1]]) ++classes;
-		c[0][p[0][i]] = classes - 1;
-	}
-	///
-	for (int h = 0; (1 << h) < n; ++h) {
-		for (int i = 0; i < n; ++i) {
-			pn[i] = p[h][i] - (1 << h);
-			if (pn[i] < 0) pn[i] += n;
-		}
-		fill(all(cnt), 0);
-		for (int i = 0; i < n; ++i) ++cnt[c[h][pn[i]]];
-		for (int i = 1; i < cnt.size(); ++i) cnt[i] += cnt[i - 1];
-		for (int i = n - 1; i >= 0; --i) p[h + 1][--cnt[c[h][pn[i]]]] = pn[i];
-		classes = 1;
-		cn[p[h + 1][0]] = 0;
-		for (int i = 1; i < n; ++i) {
-			int mid1 = (p[h + 1][i] + (1 << h)) % n, mid2 = (p[h + 1][i - 1] + (1 << h)) % n;
-			if (c[h][p[h + 1][i]] != c[h][p[h + 1][i - 1]] || c[h][mid1] != c[h][mid2]) ++classes;
-			cn[p[h + 1][i]] = classes - 1;
-		}
-		copy(all(cn), c[h + 1].begin());
-	}
-}
+class lnum{
+private:
+    vi v;
+    int mod = (int) 1e9;
+public:
+    int size() const{
+        re v.size();
+    }
+    lnum(char *s) {
+        for(int i = strlen(s); i > 0; i -= 9) {
+            s[i] = 0;
+            v.pb(atoi(i >= 9 ? s + i - 9 : s));
+        }
+        while(v.size() > 1 && v.back() == 0) v.pop_back();
+    }
+    lnum(int x) {
+        v.pb(x);
+    }
+    lnum& operator += (const lnum& a) {
+        int carry = false;
+        for(int i = 0; i < max(this->size(), a.size()) || carry; ++i) {
+            if (this->size() == i) v.pb(0);
+            v[i] += carry + (i < a.size() ? a.v[i] : 0);
+            carry = v[i] >= mod;
+            if (carry) v[i] -= mod;
+        }
+    }
+    lnum& operator -= (const lnum& a) {
+        bool carry = false;
+        for(int i = 0; i < a.size() || carry; ++i) {
+            v[i] -= carry + (i < a.size() ? a.v[i] : 0);
+            carry = v[i] < 0;
+            if (carry) v[i] += mod;
+        }
+        while(v.size() > 1 && v.back() == 0) v.pop_back();
+    }
+    bool operator < (const lnum& a) const{
+        if (this->size() < a.size()) re true;
+        if (this->size() > a.size()) re false;
+        ro(i, a.size()) {
+            if (a.v[i] == v[i]) continue;
+            re v[i] < a.v[i];
+        }
+        re false;
+    }
+    lnum& mul(const lnum& a, const lnum& b) {
+        v.clear();
+        v.resize(a.size() + b.size());
+        fo(i, a.size()) {
+            for(int j = 0, carry = 0; j < b.size() || carry; ++j) {
+                ll cur = v[i + j] + a.v[i] * 1ll * (j < b.size() ? b.v[j] : 0) + carry;
+                v[i + j] = (int) (cur % mod);
+                carry = (int) (cur / mod);
+            }
+        }
+        while(v.size() > 1 && v.back() == 0) v.pop_back();
+    }
+    lnum& operator *= (int a){
+        int carry = 0;
+        for(int i = 0; i < v.size() || carry; ++i) {
+            if (v.size() == i) v.pb(0);
+            ll cur = v[i] * 1ll * a + carry;
+            v[i] = (int) (cur % mod);
+            carry = (int) (cur / mod);
+        }
+        while(v.size() > 1 && v.back() == 0) v.pop_back();
+    }
+    lnum& pow(lnum& a, int n) {
+        char s[10]; s[0] = '1'; s[1] = 0;
+        *this = lnum(s);
+        while(n) {
+            if (n & 1) {
+                lnum x = *this;
+                this->mul(x, a);
+            }
+            lnum x = a;
+            a.mul(x, x);
+            n >>= 1;
+        }
+    }
+    void print() {
+        printf("%d", v.empty() ? 0 : v.back());
+        for(int i = (int)v.size() - 2; i >= 0; --i) printf("%09d", v[i]);
+    }
+};
 
 int main() {
-	string str;
-	cin >> str;
-	vector <vi> p, c;
-	massive_suffix(p, c, str);
-	int m = p.size();
-	fo(i, m) {
-		cout << (1 << i) << endl;
-		for (int j : p[i]) cout << j << ' ' ;
-		cout << endl;
-	}
+	lnum x(5), y(5), z(1);
+	z.mul(x, y);
+	z.print();
 	re 0;
 }
