@@ -38,56 +38,25 @@ typedef vector<ll> vll;
 typedef unsigned long long ull;
 typedef tree <pair<int, char>, null_type, less<pair<int, char>>, rb_tree_tag, tree_order_statistics_node_update> _tree;
  
-const int max_size = (int) 1e6;
-#define left (0)
-#define right ((int)1e9)
+const int sizeFenv = (int) 1e6;
+int fenv[sizeFenv];
 
-class node {
-public:
-	node *l, *r;
-	int value;
-	node() {
-		l = r = nullptr;
-		value = 0;
-	}
-};
-
-#define tree node *
-node root[max_size];
-int _now = 1;
-
-void add (tree t, int l, int r, int pos, int val) {
-	t->value += val;
-	if (r - l == 1) return;
-	int c = (l + r) >> 1;
-	if (pos < c) {
-		if (!t->l) t->l = &root[_now++];
-		add (t->l, l, c, pos, val);		
-	} else {
-		if (!t->r) t->r = &root[_now++];
-		add (t->r, c, r, pos, val);
-	}                              
+void addFenv (int p, int value) {
+	for(; p < sizeFenv; p |= p + 1)
+		fenv[p] += value;
 }
 
-int get (tree t, int l, int r, int L, int R) {
-	if (r == R && l == L) re t->value;
-	int ans = 0;
-	int c = (l + r) >> 1;
-	if (L < c && t->l) ans += get (t->l, l, c, L, min(c, R));
-	if (R > c && t->r) ans += get (t->r, c, r, max(c, L), R);
-	return ans;
+int getFenv (int r) {
+	int res = 0;
+	for(; r >= 0; r = (r & (r + 1)) - 1)
+		res += fenv[r];
+	return res;
 }
 
-int main() {
-	int n, m, x, l, r;
-	scanf("%d%d", &n, &m);
-	fo(i, n) {
-		scanf("%d", &x);
-		add(root, left, right, i, x);
-	}
-	fo(i, m) {
-		scanf("%d%d", &l, &r);
-		printf("%d\n", get(root, left, right, l - 1, r));
-	}
+int getSum (int l, int r) {
+	return getFenv(r) - getFenv(l - 1);
+}
+
+int main() {	
 	return 0;
 }
