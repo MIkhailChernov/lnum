@@ -38,25 +38,108 @@ typedef vector<ll> vll;
 typedef unsigned long long ull;
 typedef tree <pair<int, char>, null_type, less<pair<int, char>>, rb_tree_tag, tree_order_statistics_node_update> _tree;
  
-const int sizeFenv = (int) 1e6;
-int fenv[sizeFenv];
+class lnum{
+private:
+    vi v;
+    int mod = (int) 1e9;
+public:
+    int size() const {
+        re v.size();
+    }
+    lnum (char *s) {
+        for(int i = strlen(s); i > 0; i -= 9) {
+            s[i] = 0;
+            v.pb(atoi(i >= 9 ? s + i - 9 : s));
+        }
+        while(v.size() > 1 && v.back() == 0) v.pop_back();
+    }
+    lnum (int x) {
+        v.pb(x);
+    }
+    lnum () {
+    	///
+    }
+    void operator += (const lnum& a) {
+        int carry = false;
+        for(int i = 0; i < max(this->size(), a.size()) || carry; ++i) {
+            if (this->size() == i) v.pb(0);
+            v[i] += carry + (i < a.size() ? a.v[i] : 0);
+            carry = v[i] >= mod;
+            if (carry) v[i] -= mod;
+        }
+    }
+    void operator -= (const lnum& a) {
+        bool carry = false;
+        for(int i = 0; i < a.size() || carry; ++i) {
+            v[i] -= carry + (i < a.size() ? a.v[i] : 0);
+            carry = v[i] < 0;
+            if (carry) v[i] += mod;
+        }
+        while(v.size() > 1 && v.back() == 0) v.pop_back();
+    }
+    bool operator < (const lnum& a) const {
+        if (this->size() < a.size()) re true;
+        if (this->size() > a.size()) re false;
+        ro(i, a.size()) {
+            if (a.v[i] == v[i]) continue;
+            re v[i] < a.v[i];
+        }
+        re false;
+    }
+    bool operator > (const lnum &a) const {
+        if (this->size() < a.size()) re false;
+        if (this->size() > a.size()) re true;
+        ro(i, a.size()) {
+            if (a.v[i] == v[i]) continue;
+            re v[i] > a.v[i];
+        }
+        re false;
+    }
+    bool operator == (const lnum &a) const {
+    	if (a.v == this->v) re true;
+    	re false;
+    }
+    void mul(const lnum& a, const lnum& b) {
+        v.clear();
+        v.resize(a.size() + b.size());
+        fo(i, a.size()) {
+            for(int j = 0, carry = 0; j < b.size() || carry; ++j) {
+                ll cur = v[i + j] + a.v[i] * 1ll * (j < b.size() ? b.v[j] : 0) + carry;
+                v[i + j] = (int) (cur % mod);
+                carry = (int) (cur / mod);
+            }
+        }
+        while(v.size() > 1 && v.back() == 0) v.pop_back();
+    }
+    void operator *= (int a){
+        int carry = 0;
+        for(int i = 0; i < (int)v.size() || carry; ++i) {
+            if ((int)v.size() == i) v.pb(0);
+            ll cur = v[i] * 1ll * a + carry;
+            v[i] = (int) (cur % mod);
+            carry = (int) (cur / mod);
+        }
+        while(v.size() > 1 && v.back() == 0) v.pop_back();
+    }
+    void pow(lnum& a, int n) {
+        char s[10]; s[0] = '1'; s[1] = 0;
+        *this = lnum(s);
+        while(n) {
+            if (n & 1) {
+                lnum x = *this;
+                this->mul(x, a);
+            }
+            lnum x = a;
+            a.mul(x, x);
+            n >>= 1;
+        }
+    }
+    void print() {
+        printf("%d", v.empty() ? 0 : v.back());
+        for(int i = (int)v.size() - 2; i >= 0; --i) printf("%09d", v[i]);
+    }
+};
 
-void addFenv (int p, int value) {
-	for(; p < sizeFenv; p |= p + 1)
-		fenv[p] += value;
-}
-
-int getFenv (int r) {
-	int res = 0;
-	for(; r >= 0; r = (r & (r + 1)) - 1)
-		res += fenv[r];
-	return res;
-}
-
-int getSum (int l, int r) {
-	return getFenv(r) - getFenv(l - 1);
-}
-
-int main() {	
-	return 0;
+int main() {
+	re 0;
 }
